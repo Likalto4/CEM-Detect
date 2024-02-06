@@ -34,10 +34,19 @@ class dataset_CDD_CESM:
             mode_str_name = '_CM_' if mode=='substracted' else '_DM_'
             self.annotations = self.annotations[self.annotations['#filename'].str.contains(mode_str_name)].reset_index(drop=True)
             self.mode = mode
+        else:
+            self.mode = None
         # attributes
         self.patient_ids = self.metadata['Patient_ID'].unique()
         
+    def redefine_metadata(self, metadata:pd.DataFrame):
+        """redefine the metadata of the object
 
+        Args:
+            metadata (pd.DataFrame): new metadata
+        """
+        self.metadata = metadata
+        self.patient_ids = self.metadata['Patient_ID'].unique()
     def __repr__(self) -> str:
         return f'CDD-CESM dataset with {len(self.patient_ids)} patients\nTotal images: {len(self.metadata)}'
     
@@ -74,14 +83,15 @@ class patient_CDD(dataset_CDD_CESM):
         super().__init__()
         self.patient_id = patient_id
         self.metadata = dataset.metadata[dataset.metadata.Patient_ID == patient_id].reset_index(drop=True)
+        self.mode = dataset.mode
         # individual instantaneus attributes
         self.image_lat = None
         self.image_view = None
         self.image_mode = None
     def __repr__(self) -> str:
-        return f'Patient {self.patient_id} with {len(self.metadata)} images (half low-energy, half dual-energy)'
+        return f'Patient {self.patient_id} with {len(self.metadata)} images'
     
-    def set_image(self, mode:str = 'low-energy' or 'substracted', view:str = 'CC' or 'MLO', laterality:str = 'L' or 'R'):
+    def set_image(self, mode:str =None, view:str = 'CC' or 'MLO', laterality:str = 'L' or 'R'):
         """set the image to be used. An image is fully defined if the three inputs are given
         further information can be extracted after setting the image
 
@@ -91,13 +101,15 @@ class patient_CDD(dataset_CDD_CESM):
             laterality (str, optional): side or laterality. Defaults to 'L'or'R'.
         """
         # check inputs
+        if self.mode is None:
+            if mode not in self.alias.keys():
+                raise ValueError(f'Invalid mode. Use one of {self.alias.keys()}')
         if view not in ['CC', 'MLO']:
             raise ValueError('Invalid view. Use CC or MLO')
-        if mode not in self.alias.keys():
-            raise ValueError(f'Invalid mode. Use one of {self.alias.keys()}')
         if laterality not in ['L', 'R']:
             raise ValueError('Invalid laterality. Use L or R')
         
+        mode = self.mode if mode is None else mode
         # filter based on the inputs
         self.image_metadata = self.metadata[(self.metadata.View == view)
                                            & (self.metadata.Type == self.alias[mode])
