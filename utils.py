@@ -71,7 +71,7 @@ class patient_CDD(dataset_CDD_CESM):
     def __repr__(self) -> str:
         return f'Patient {self.patient_id} with {len(self.metadata)} images (half low-energy, half dual-energy)'
     
-    def set_image(self, view:str = 'CC' or 'MLO', mode:str = 'low-energy' or 'substracted', laterality:str = 'L' or 'R'):
+    def set_image(self, mode:str = 'low-energy' or 'substracted', view:str = 'CC' or 'MLO', laterality:str = 'L' or 'R'):
         """set the image to be used. An image is fully defined if the three inputs are given
         further information can be extracted after setting the image
 
@@ -210,7 +210,8 @@ class patient_CDD(dataset_CDD_CESM):
         image = self.get_array(flip=False, plot=False)
         fig, ax = plt.subplots(1,1, figsize=(14,7))
         ax.imshow(image)
-        ax.set_title(f'Pat_{self.image_path.stem}, findings: {self.image_findings}\n{self.image_num_annotations} regions')
+        ax.set_title(f'Pat_{self.image_path.stem}, findings: {self.image_findings}\n{self.image_num_annotations} regions\n \
+        {self.image_metadata["Pathology Classification/ Follow up"].values[0]}')
         for region_num in range(self.image_num_annotations):
             dic_ex = self.image_annotations[self.image_annotations.region_id==region_num].region_shape_attributes.values[0]
             # plot annotation
@@ -225,3 +226,19 @@ class patient_CDD(dataset_CDD_CESM):
                 ax.scatter(center[0], center[1], c='r', s=10)
             fig.tight_layout()
         plt.show()
+
+    def patient_image_combinations(self, metadata:pd.DataFrame=None):
+        if metadata is None:
+            metadata = self.metadata
+        side_array = metadata.Side.to_numpy()
+        view_array = metadata.View.to_numpy()
+        type_array = metadata.Type.to_numpy()
+        # map type to the alias
+        alias_inv = {v: k for k, v in self.alias.items()}
+        type_array = np.array([alias_inv[i] for i in type_array])
+
+        # put all arrays in one
+        all_combinations = np.vstack((type_array, view_array, side_array)).T
+
+        return all_combinations
+    
