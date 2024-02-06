@@ -17,23 +17,31 @@ import numpy as np
 class dataset_CDD_CESM:
     """Class to load the CDD-CESM dataset
     """
-    def __init__(self) -> None:
+    def __init__(self, mode:str=None) -> None:
         # useful items
         self.alias = {'low-energy':'DM', 'substracted':'CESM'}
         # paths
         self.im_dir = repo_path / 'data/CDD-CESM/images'
-        # self.im_dir = 'data/CDD-CESM/images'
         self.metadata_path = repo_path / 'data/CDD-CESM/metadata/Radiology_manual_annotations.xlsx'
         self.annotations_path = repo_path / 'data/CDD-CESM/metadata/Radiology_hand_drawn_segmentations_v2.csv'
         # read metadata
         self.metadata = pd.read_excel(self.metadata_path, sheet_name='all')
         self.annotations = pd.read_csv(self.annotations_path, converters={'region_shape_attributes':ast.literal_eval}) # read region_shape_attributes as a dictionary
+        # # work with special mode only
+        if mode is not None:
+            assert mode in self.alias.keys(), f'Invalid mode. Use one of {self.alias.keys()}'
+            self.metadata = self.metadata[self.metadata['Type'] == self.alias[mode]].reset_index(drop=True)
+            mode_str_name = '_CM_' if mode=='substracted' else '_DM_'
+            self.annotations = self.annotations[self.annotations['#filename'].str.contains(mode_str_name)].reset_index(drop=True)
+            self.mode = mode
         # attributes
         self.patient_ids = self.metadata['Patient_ID'].unique()
+        
+
     def __repr__(self) -> str:
-        return f'CDD-CESM dataset with {len(self.patient_ids)} patients\nTotal images: {len(self.metadata)}, half low-energy, half dual-energy'
+        return f'CDD-CESM dataset with {len(self.patient_ids)} patients\nTotal images: {len(self.metadata)}'
     
-    def get_images_paths(self, mode='low-energy' or 'substracted', metadata = None):
+    def get_images_paths(self, mode:str= None, metadata:pd.DataFrame = None):
         """given the metadata given all paths will be returned
 
         Args:
@@ -49,13 +57,15 @@ class dataset_CDD_CESM:
 
         if metadata is None: # if no input is given, use the class attribute
             metadata = self.metadata
-
-        if mode not in self.alias.keys():
-            raise ValueError(f'Invalid mode. Use one of {self.alias.keys()}')
         
-        mode_metadata = metadata[metadata.Type == self.alias[mode]].reset_index(drop=True)
+        if mode is not None:
+            if mode not in self.alias.keys():
+                raise ValueError(f'Invalid mode. Use one of {self.alias.keys()}')
+            metadata = metadata[metadata.Type == self.alias[mode]].reset_index(drop=True)
+        else:
+            mode = self.mode
         
-        dm_images = str(self.im_dir) + f'/{mode}/' + mode_metadata.Image_name + '.jpg'
+        dm_images = str(self.im_dir) + f'/{mode}/' + metadata.Image_name + '.jpg'
 
         return dm_images
 
