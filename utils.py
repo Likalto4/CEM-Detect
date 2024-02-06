@@ -47,6 +47,7 @@ class dataset_CDD_CESM:
         """
         self.metadata = metadata
         self.patient_ids = self.metadata['Patient_ID'].unique()
+
     def __repr__(self) -> str:
         return f'CDD-CESM dataset with {len(self.patient_ids)} patients\nTotal images: {len(self.metadata)}'
     
@@ -85,49 +86,39 @@ class patient_CDD(dataset_CDD_CESM):
         self.metadata = dataset.metadata[dataset.metadata.Patient_ID == patient_id].reset_index(drop=True)
         self.mode = dataset.mode
         # individual instantaneus attributes
+        self.row_counter = -1
         self.image_lat = None
         self.image_view = None
         self.image_mode = None
+        self.image_findings = None
+        self.image_pathology = None
+
     def __repr__(self) -> str:
         return f'Patient {self.patient_id} with {len(self.metadata)} images'
     
-    def set_image(self, mode:str =None, view:str = 'CC' or 'MLO', laterality:str = 'L' or 'R'):
-        """set the image to be used. An image is fully defined if the three inputs are given
-        further information can be extracted after setting the image
-
-        Args:
-            view (str, optional): image view of the mamomgram. Defaults to 'CC'or'MLO'.
-            mode (str, optional): modality of the dual-energy protocol. Defaults to 'low-energy'or'substracted'.
-            laterality (str, optional): side or laterality. Defaults to 'L'or'R'.
-        """
-        # check inputs
-        if self.mode is None:
-            if mode not in self.alias.keys():
-                raise ValueError(f'Invalid mode. Use one of {self.alias.keys()}')
-        if view not in ['CC', 'MLO']:
-            raise ValueError('Invalid view. Use CC or MLO')
-        if laterality not in ['L', 'R']:
-            raise ValueError('Invalid laterality. Use L or R')
-        
-        mode = self.mode if mode is None else mode
-        # filter based on the inputs
-        self.image_metadata = self.metadata[(self.metadata.View == view)
-                                           & (self.metadata.Type == self.alias[mode])
-                                           & (self.metadata.Side == laterality)].reset_index(drop=True)
-        
-        # if no image is found, raise error
-        if len(self.image_metadata) == 0:
-            print(f'Possible values:\n{self.metadata.Image_name}')
-            raise FileNotFoundError('No image found with the given parameters')
-        
-        self.image_lat = laterality
-        self.image_view = view
-        self.image_mode = mode
+    def set_image(self, show_status:bool=True , mode:str =None, view:str = None, laterality:str = None):
+        assert len(self.metadata) > 0, 'No images found for this patient in this metadata'
+        self.row_counter += 1
+        # access the row accordint to row_counter
+        im_row = self.metadata.iloc[self.row_counter]
+        # set attributes of current image
+        self.image_mode = 'low-energy' if im_row['Type'] == 'DM' else 'substracted'
+        self.image_view = im_row['View']
+        self.image_lat = im_row['Side']
+        self.image_findings = im_row['Findings']
+        self.image_pathology = im_row['Pathology Classification/ Follow up']
+        self.image_metadata = pd.DataFrame(im_row).T
         self.image_path = self.get_path()
-        self.image_findings = self.image_metadata['Findings'].values[0]
-        self.image_tags = self.image_metadata['Tags'].values[0]
         self.image_annotations = self.annotations[self.annotations['#filename'] == self.image_path.name].reset_index(drop=True)
         self.image_num_annotations = len(self.image_annotations)
+
+        if show_status:
+            print(f'Image {self.row_counter+1} of {len(self.metadata)}')
+
+        # stop when reaching end of metadata
+        if self.row_counter == len(self.metadata)-1:
+            self.row_counter = -1
+            print("End of patient's images, reseting counter to 0")
 
     def get_path(self):
         """get path of defined image
@@ -143,8 +134,7 @@ class patient_CDD(dataset_CDD_CESM):
             
         
         return Path(paths_series[0])
-    
-    
+       
     def get_array(self, flip:bool = False, plot:bool = False):
         """get the array of the set image previously defined
 
