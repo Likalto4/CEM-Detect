@@ -76,6 +76,8 @@ class dataset_CDD_CESM:
             mode = self.mode
         
         dm_images = str(self.im_dir) + f'/{mode}/' + metadata.Image_name + '.jpg'
+        # ensure no space in the paths
+        dm_images = dm_images.str.replace(' ', '')
 
         return dm_images
 
