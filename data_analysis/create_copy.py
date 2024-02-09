@@ -7,7 +7,6 @@ while '.gitignore' not in os.listdir(repo_path): # while not in the root of the 
 sys.path.insert(0,str(repo_path)) if str(repo_path) not in sys.path else None
 
 from PIL import Image
-import numpy as np
 from tqdm import tqdm
 
 from torchvision.transforms import (

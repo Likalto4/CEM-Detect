@@ -122,7 +122,7 @@ class patient_CDD(dataset_CDD_CESM):
         # stop when reaching end of metadata
         if self.row_counter == len(self.metadata)-1:
             self.row_counter = -1
-            print("End of patient's images, reseting counter to 0")
+            print("End of patient's images, reseting counter to 0") if show_status else None
 
     def get_path(self):
         """get path of defined image
