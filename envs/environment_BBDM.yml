@@ -74,6 +74,7 @@ dependencies:
     - pyasn1==0.4.8
     - pyasn1-modules==0.2.8
     - pytorch-lightning==1.9.3
+    - pytorch-fid
     - pywavelets==1.4.1
     - pyyaml==6.0
     - qudida==0.0.4
