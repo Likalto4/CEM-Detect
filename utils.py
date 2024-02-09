@@ -94,6 +94,7 @@ class patient_CDD(dataset_CDD_CESM):
         self.image_mode = None
         self.image_findings = None
         self.image_pathology = None
+        self.image_tags = None
 
     def __repr__(self) -> str:
         return f'Patient {self.patient_id} with {len(self.metadata)} images'
@@ -109,6 +110,7 @@ class patient_CDD(dataset_CDD_CESM):
         self.image_lat = im_row['Side']
         self.image_findings = im_row['Findings']
         self.image_pathology = im_row['Pathology Classification/ Follow up']
+        self.image_tags = im_row['Tags']
         self.image_metadata = pd.DataFrame(im_row).T
         self.image_path = self.get_path()
         self.image_annotations = self.annotations[self.annotations['#filename'] == self.image_path.name].reset_index(drop=True)
@@ -224,7 +226,7 @@ class patient_CDD(dataset_CDD_CESM):
         image = self.get_array(flip=False, plot=False)
         fig, ax = plt.subplots(1,1, figsize=(14,7))
         ax.imshow(image)
-        ax.set_title(f'Pat_{self.image_path.stem}, findings: {self.image_findings}\n{self.image_num_annotations} regions\n \
+        ax.set_title(f'Pat_{self.image_path.stem}, findings: {self.image_findings}\nTags: {self.image_tags}, {self.image_num_annotations} regions\n \
         {self.image_metadata["Pathology Classification/ Follow up"].values[0]}')
         for region_num in range(self.image_num_annotations):
             dic_ex = self.image_annotations[self.image_annotations.region_id==region_num].region_shape_attributes.values[0]
