@@ -18,9 +18,6 @@ from torchvision.transforms import (
 from utils import dataset_CDD_CESM, patient_CDD
 
 def main():
-    # origin dir
-    low_energy_dir = repo_path / 'data/CDD-CESM/images/low-energy'
-    substracted_dir = repo_path / 'data/CDD-CESM/images/substracted' 
     # objective dir
     training_low = repo_path / 'data/CCDforBBDM/train/A'
     training_sub = repo_path / 'data/CCDforBBDM/train/B'
