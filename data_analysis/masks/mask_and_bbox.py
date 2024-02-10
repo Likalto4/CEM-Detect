@@ -11,6 +11,7 @@ from utils import dataset_CDD_CESM, patient_CDD
 import numpy as np
 import cv2 as cv
 import pandas as pd
+from tqdm import tqdm
 
 def generate_ellipse_mask(image_shape:tuple, center_xy:tuple, axes:tuple):
     """generates a binary mask of an ellipse, given the original image dimensions and the ellipse parameters
@@ -80,19 +81,19 @@ def main():
     masks_dir = repo_path / 'data/CDD-CESM/masks'
     bbox_dataframe = None
 
-    for pat_id in dataset_CESM.patient_ids:
+    for pat_id in tqdm(dataset_CESM.patient_ids):
         patient = patient_CDD(pat_id, dataset_CESM)
-        print(patient)
+        # print(patient)
         while True:
             patient.set_image(show_status=False) # to load the image info
             image = patient.get_array(flip=False, plot=False)
-            print(f'The current image has {patient.image_num_annotations} annotations')
+            # print(f'The current image has {patient.image_num_annotations} annotations')
             # loop of lesions
             if patient.image_num_annotations!=0: # check if there are annotations
                 for region_num in range(patient.image_num_annotations):
 
                     dic_ex = patient.image_annotations[patient.image_annotations.region_id==region_num].region_shape_attributes.values[0]
-                    print(f'The annotation is a(n) {dic_ex["name"]}')
+                    # print(f'The annotation is a(n) {dic_ex["name"]}')
                     if dic_ex['name'] in ['ellipse','circle']:
                         center, axes = patient.ellipse_reader(dic_ex)
                         mask = generate_ellipse_mask(image.shape, center, axes)
@@ -108,7 +109,7 @@ def main():
                     saving_dir.parent.mkdir(parents=True, exist_ok=True)
                     cv.imwrite(str(saving_dir), mask)
                     # save bbox
-                    bbox_actual = pd.DataFrame({'image_name': [patient.image_path.stem], 'region_id': [region_num], 'bbox': [bbox_from_mask(mask)]})
+                    bbox_actual = pd.DataFrame({'patient_id':[pat_id], 'image_name': [patient.image_path.stem], 'region_id': [region_num], 'bbox': [bbox_from_mask(mask)]})
                     bbox_dataframe = pd.concat([bbox_dataframe, bbox_actual], ignore_index=True)
 
             if patient.row_counter==-1:
