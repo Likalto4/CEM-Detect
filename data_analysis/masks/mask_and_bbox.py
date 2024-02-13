@@ -98,6 +98,8 @@ def main():
                         center, axes = patient.ellipse_reader(dic_ex)
                         mask = generate_ellipse_mask(image.shape, center, axes)
                     elif dic_ex['name']=='polygon' or dic_ex['name']=='polyline':
+                        if dic_ex['name']=='polyline':
+                             print(f'Polyline annotations present in patient {pat_id} image {patient.image_path.stem} region {region_num}')
                         vertices = patient.polygon_reader(dic_ex)
                         mask = generate_polygon_mask(image.shape, vertices)
                     elif dic_ex['name']=='point':
