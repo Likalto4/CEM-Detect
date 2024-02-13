@@ -200,7 +200,7 @@ class patient_CDD(dataset_CDD_CESM):
         Raises:
             ValueError: if the reader is not correct
         """
-        if annot['name']!='polygon':
+        if annot['name'] not in ['polygon', 'polyline']:
             raise ValueError('wrong reader')
         vertices = annot['all_points_x'], annot['all_points_y']
         vertices = np.array(vertices).T

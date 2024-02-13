@@ -91,18 +91,19 @@ def main():
             # loop of lesions
             if patient.image_num_annotations!=0: # check if there are annotations
                 for region_num in range(patient.image_num_annotations):
-
+                    mask = None # reset mask, just to be sure not to use the previous one !
                     dic_ex = patient.image_annotations[patient.image_annotations.region_id==region_num].region_shape_attributes.values[0]
                     # print(f'The annotation is a(n) {dic_ex["name"]}')
                     if dic_ex['name'] in ['ellipse','circle']:
                         center, axes = patient.ellipse_reader(dic_ex)
                         mask = generate_ellipse_mask(image.shape, center, axes)
-                    elif dic_ex['name']=='polygon':
+                    elif dic_ex['name']=='polygon' or dic_ex['name']=='polyline':
                         vertices = patient.polygon_reader(dic_ex)
                         mask = generate_polygon_mask(image.shape, vertices)
                     elif dic_ex['name']=='point':
                         print('Point annotations are not supported.')
                         print(patient)
+                        continue
 
                     # save mask
                     saving_dir = masks_dir / patient.image_path.parent.name /  f'{patient.image_path.stem}_reg{region_num}.png'
