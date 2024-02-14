@@ -43,7 +43,6 @@ def main():
         # expanding requirement
         expand_w = 512 - current_w
         expand_h = 512 - current_h
-        print(expand_w, expand_h)
         
         # expand the bbox on both sides, unevenly following a random ratio
         left_expand = np.random.randint(0, expand_w) if expand_w > 0 else 0
@@ -74,6 +73,11 @@ def main():
         x, y, w, h = cv.boundingRect(new_mask)
         new_mask = np.zeros_like(new_mask)
         new_mask[y:y+h, x:x+w] = 255
+
+        # check that mask and image are 512x512
+        if new_im.shape[0] != 512 or new_im.shape[1] != 512:
+            print(f"Error: image shape is {new_im.shape}")
+            continue
 
         # save the new image and mask
         saving_im_path = saving_im_dir / f"{ex_row['image_name']}_reg{ex_row['region_id']}.jpg"

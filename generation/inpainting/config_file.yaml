@@ -6,9 +6,9 @@ revision: fp16 # str # type of model kept for fp16 optimization
 # Pretrained tokenizer name or path if not the same as model_name
 tokenizer_name: null # str
 # data:
-instance_data_dir: /home/ricardo/master_thesis/diffusion-models_master/data/images/breast40k_RGB_wlesions # Mandatory, str
+instance_data_dir: /home/ricardo/projects/CEM-Detect/data/CDD-CESM/masses_closeup/images/CEM-square_small_bbox # Mandatory, str
 instance_prompt: a mammogram with a lesion
-output_dir: /home/ricardo/master_thesis/diffusion-models_master/results/mammo_lesion-inpainting # Mandatory, str
+output_dir: /home/ricardo/projects/CEM-Detect/generation/inpainting/results/CEM-small_mass # Mandatory, str
 # hub:
 push_to_hub: true
 hub_token: null
@@ -19,8 +19,8 @@ report_to: wandb
 validation_prompt: a mammogram with a lesion # validation prompt for logging
 num_validation_images: 4
 validation_steps: 250 # how often to log validation images
-val_input_image_path: /home/ricardo/master_thesis/diffusion-models_master/experiments/inpainting/data/pil_image.png
-val_mask_image_path: /home/ricardo/master_thesis/diffusion-models_master/experiments/inpainting/data/mask.png
+val_input_image_path: /home/ricardo/projects/CEM-Detect/generation/inpainting/data/image.jpg
+val_mask_image_path: /home/ricardo/projects/CEM-Detect/generation/inpainting/data/mask.jpg
 # prior_preservation:
 with_prior_preservation: false
 class_data_dir: null # Class images folder for prior preservation

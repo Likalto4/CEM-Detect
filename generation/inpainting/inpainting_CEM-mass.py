@@ -37,7 +37,7 @@ from accelerate.logging import get_logger
 from accelerate.utils import ProjectConfiguration, set_seed
 from huggingface_hub import HfFolder, Repository, create_repo, whoami
 from packaging import version
-# from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw
 from torch.utils.data import Dataset
 from torchvision import transforms
 from tqdm.auto import tqdm
@@ -551,7 +551,7 @@ def main():
 
     def read_mask(instance_path):
         instance_path = Path(instance_path) # be sure that is a path object
-        mask_path  = repo_path / 'data/masks' / instance_path.parent.name / instance_path.name
+        mask_path  = instance_path.parent.parent.parent / 'masks' / instance_path.parent.name / (instance_path.stem + '.png')
         mask = Image.open(mask_path)
         return mask
 
