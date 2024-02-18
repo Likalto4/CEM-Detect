@@ -7,7 +7,7 @@ revision: fp16 # str # type of model kept for fp16 optimization
 tokenizer_name: null # str
 # data:
 instance_data_dir: /home/ricardo/projects/CEM-Detect/data/CDD-CESM/masses_closeup/images/CEM-square_small_bbox # Mandatory, str
-instance_prompt: a mammogram with a lesion
+instance_prompt: a mammogram with a mass lesion
 output_dir: /home/ricardo/projects/CEM-Detect/generation/inpainting/results/CEM-small_mass # Mandatory, str
 # hub:
 push_to_hub: true
@@ -16,9 +16,9 @@ hub_model_id: null # name of the model on the hub (output dir instead)
 # logging:
 logging_dir: logs # log diredctory
 report_to: wandb
-validation_prompt: a mammogram with a lesion # validation prompt for logging
+validation_prompt: a mammogram with a mass lesion # validation prompt for logging
 num_validation_images: 4
-validation_steps: 250 # how often to log validation images
+validation_steps: 236 # how often to log validation images
 val_input_image_path: /home/ricardo/projects/CEM-Detect/generation/inpainting/data/image.jpg
 val_mask_image_path: /home/ricardo/projects/CEM-Detect/generation/inpainting/data/mask.jpg
 # prior_preservation:
@@ -30,7 +30,7 @@ num_class_images: 100
 sample_batch_size: 4
 prior_generation_precision: null # fp16, bf16, or fp32
 # checkpointing:
-checkpointing_steps: 3000 # save state every checkpointing_steps
+checkpointing_steps: 450 # save state every checkpointing_steps
 checkpoints_total_limit: null # limit of total checkpoints to save
 resume_from_checkpoint: null # wheather to resume from checkpoint
 # training:
@@ -41,7 +41,7 @@ train_text_encoder: true # train the text encoder
 train_batch_size: 8 # per device
 gradient_accumulation_steps: 1
 num_train_epochs: 1
-max_train_steps: 15000 # overrides num_train_epochs
+max_train_steps: 6000 # overrides num_train_epochs
 learning_rate: 1.0e-6 # lr after (potential) warmup
 scale_lr: False #Scale the learning rate by the number of GPUs, gradient accumulation steps, and batch size
 lr_scheduler: constant
