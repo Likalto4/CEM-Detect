@@ -9,31 +9,16 @@ sys.path.insert(0,str(repo_path)) if str(repo_path) not in sys.path else None
 os.environ['CUDA_DEVICE_ORDER']='PCI_BUS_ID'
 os.environ['CUDA_VISIBLE_DEVICES']='0'
 
-import detectron2
-from detectron2.utils.logger import setup_logger
-from detectron2 import model_zoo
 from detectron2.engine import DefaultPredictor
 from detectron2.config import get_cfg
-from detectron2.utils.visualizer import Visualizer
 from detectron2.data import MetadataCatalog, DatasetCatalog
-from detectron2.utils.visualizer import ColorMode
-from detectron2.structures import pairwise_iou, boxes
 from detectron2.structures import BoxMode
-from detectron2.structures import Instances
-
-import torch
 import cv2 as cv
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-from PIL import Image
-
 from detectron2.evaluation import COCOEvaluator, inference_on_dataset
 from detectron2.data import build_detection_test_loader
-
-# settings
-
+from detectron2.utils.logger import setup_logger
+setup_logger()
 
 
 def get_dicts(dataframe, im_dir):
