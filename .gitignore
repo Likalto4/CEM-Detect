@@ -3,6 +3,7 @@ data/
 results/
 wandb/
 output/
+generation/bbridge/data_preparation/TransformParameters.0.txt
 
 BBDM/
 
