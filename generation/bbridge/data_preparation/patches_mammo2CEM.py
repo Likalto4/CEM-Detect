@@ -52,7 +52,7 @@ def main():
     train_metadata = pd.read_csv(train_metadata_path)
 
     # saving dir
-    save_dir = repo_path / 'generation/bbridge/data/CEM-512/split_1' / 'val' # <--- change this
+    save_dir = repo_path / 'generation/bbridge/data/CEM-512/split_1_corr' / 'val' # <--- change this
     save_dir.mkdir(parents=True, exist_ok=True)
 
     # loop on images
@@ -76,8 +76,9 @@ def main():
         print(f'Shape after registration: {ex_im.shape}, {low_im.shape}')
 
         # create a subimage of 512x512, starting from the 0,0 corner
-        for i_y in range(len(ex_im)//512):
-            for i_x in range(len(ex_im[0])//512):
+        for i_y in range((ex_im.shape[0])//512 + 1):
+            for i_x in range((ex_im.shape[1])//512 + 1):
+
                 y_shift = 512*i_y
                 x_shift = 512*i_x
 
@@ -86,8 +87,19 @@ def main():
                 from_x = 0+x_shift
                 to_x = 512+x_shift
 
-                if to_y > ex_im.shape[0]: # when to_y is too large (end of image)
-                    # to_complete_y = 512 - (ex_im.shape[0] - from_y)
+                if to_y > ex_im.shape[0] and to_x > ex_im.shape[1]: # when to_y and to_x are too large
+                    to_y = ex_im.shape[0]
+                    to_x = ex_im.shape[1]
+
+                    sub_im = np.zeros((512, 512), dtype=np.uint8)
+                    # fill the subimage with the original image
+                    sub_im[:to_y-from_y, :to_x-from_x] = ex_im[from_y:to_y, from_x:to_x]
+                    # replicate for low energy image
+                    sub_low_im = np.zeros((512, 512), dtype=np.uint8)
+                    sub_low_im[:to_y-from_y, :to_x-from_x] = low_im[from_y:to_y, from_x:to_x]
+
+
+                elif to_y > ex_im.shape[0]: # when to_y is too large (end of image)
                     to_y = ex_im.shape[0]
 
                     sub_im = np.zeros((512, 512), dtype=np.uint8)
@@ -97,7 +109,6 @@ def main():
                     sub_low_im = np.zeros((512, 512), dtype=np.uint8)
                     sub_low_im[:to_y-from_y, :] = low_im[from_y:to_y, from_x:to_x]
                 elif to_x > ex_im.shape[1]:
-                    # to_complete_x = 512 - (ex_im.shape[1] - from_x)
                     to_x = ex_im.shape[1]
 
                     sub_im = np.zeros((512, 512), dtype=np.uint8)
@@ -124,14 +135,15 @@ def main():
                 # sub_low_im = Image.fromarray(sitk.GetArrayFromImage(moved_im)).convert('L')
                 # #####
 
-                # save image in the save_dir
-                save_path = save_dir / 'B' / f'{ex_im_path.stem}_y{i_y}_x{i_x}.jpg'
-                save_path.parent.mkdir(parents=True, exist_ok=True)
-                sub_im.save(save_path)
+                # save image in the save_dir if not black
+                if not black:   
+                    save_path = save_dir / 'B' / f'{ex_im_path.stem}_y{i_y}_x{i_x}.jpg'
+                    save_path.parent.mkdir(parents=True, exist_ok=True)
+                    sub_im.save(save_path)
 
-                save_path_low = save_dir / 'A' / f'{low_im_path.stem}_y{i_y}_x{i_x}.jpg'
-                save_path_low.parent.mkdir(parents=True, exist_ok=True)
-                sub_low_im.save(save_path_low)
+                    save_path_low = save_dir / 'A' / f'{low_im_path.stem}_y{i_y}_x{i_x}.jpg'
+                    save_path_low.parent.mkdir(parents=True, exist_ok=True)
+                    sub_low_im.save(save_path_low)
 
 if __name__ == "__main__":
     main()
