@@ -6,9 +6,9 @@ revision: fp16 # str # type of model kept for fp16 optimization
 # Pretrained tokenizer name or path if not the same as model_name
 tokenizer_name: null # str
 # data:
-instance_data_dir: /home/ricardo/projects/CEM-Detect/data/CDD-CESM/masses_closeup/images/CEM-square_small_bbox # Mandatory, str
+instance_data_dir: /home/ricardo/projects/CEM-Detect/generation/inpainting/data/training_set/closeups/images/split_1 # <---- change
 instance_prompt: a mammogram with a mass lesion
-output_dir: /home/ricardo/projects/CEM-Detect/generation/inpainting/results/CEM-small_mass # Mandatory, str
+output_dir: /home/ricardo/projects/CEM-Detect/generation/inpainting/results/CEM-small_mass_split-1 # <---- change
 # hub:
 push_to_hub: true
 hub_token: null
@@ -30,7 +30,7 @@ num_class_images: 100
 sample_batch_size: 4
 prior_generation_precision: null # fp16, bf16, or fp32
 # checkpointing:
-checkpointing_steps: 450 # save state every checkpointing_steps
+checkpointing_steps: 250 # save state every checkpointing_steps
 checkpoints_total_limit: null # limit of total checkpoints to save
 resume_from_checkpoint: null # wheather to resume from checkpoint
 # training:
@@ -41,7 +41,7 @@ train_text_encoder: true # train the text encoder
 train_batch_size: 8 # per device
 gradient_accumulation_steps: 1
 num_train_epochs: 1
-max_train_steps: 6000 # overrides num_train_epochs
+max_train_steps: 3000 # overrides num_train_epochs
 learning_rate: 1.0e-6 # lr after (potential) warmup
 scale_lr: False #Scale the learning rate by the number of GPUs, gradient accumulation steps, and batch size
 lr_scheduler: constant
