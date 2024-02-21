@@ -74,10 +74,9 @@ def main():
     # paths
     metadata_path = repo_path / 'data/CDD-CESM/metadata/bboxes/split_1/test_set.csv'
     config_file = repo_path / 'data/models/config_trained_R_101_30k.yaml'
-    # model_file = repo_path / 'data/models/model_final_R_101_omidb_30k_dbt9k_f12_gray.pth' # pure
-    # model_file = repo_path  /'detection/training/output/model_final.pth' # fine-tuned
+    model_file = repo_path / 'data/models/model_final_R_101_omidb_30k_dbt9k_f12_gray.pth' # pure
     mod_num = 14
-    model_file = repo_path / 'detection/training/output' / f'model_00{mod_num}999.pth' # fine-tuned 2
+    # model_file = repo_path / 'detection/training/output' / f'model_00{mod_num}999.pth' # fine-tuned 2
     im_dir = repo_path / 'data/CDD-CESM/images/substracted'
     # saving paths
     # output_dir = repo_path / 'detection/inference/results' / 'pure_DBT'
