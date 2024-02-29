@@ -156,26 +156,30 @@ def get_CEM_dicts(dataframe, im_dir):
 
         return dataset_dicts
 
+def register_dataset(registraiton_name:str):
+    # paths
+    csv_meta_path = repo_path / 'generation/inpainting/data/inpainted_normal_cases/metadata.csv' # <---- change
+    im_dir = repo_path / 'generation/inpainting/data/inpainted_normal_cases/images' # <---- change
+    # clean image_name column, no black spaces
+    df = pd.read_csv(csv_meta_path)
+    df['image_name'] = df['image_name'].str.strip()
+    # register our dataset
+    DatasetCatalog.clear()
+    DatasetCatalog.register(registraiton_name, lambda: get_CEM_dicts(dataframe=df, im_dir=im_dir))
+    MetadataCatalog.get(registraiton_name).set(thing_classes=["mass"])
+    
+
 def main():
     # parameters
     iter_num = 30000
-    p_CEM = "30k"
-    # tests:. 101 vs R2
-    m_layer = 'R_101'
-    g_rgb = "gray" # if we train with rgb or grayscale
     
-    # register our dataset
-    csv_meta_path = repo_path / 'generation/inpainting/data/inpainted_normal_cases/metadata.csv' # <---- change
-    im_dir = repo_path / 'generation/inpainting/data/inpainted_normal_cases/images' # <---- change
-    DatasetCatalog.clear()
+    # dataset
     registraiton_name = "CEM_train"
-    DatasetCatalog.register(registraiton_name, lambda: get_CEM_dicts(dataframe=pd.read_csv(csv_meta_path), im_dir=im_dir))
-    MetadataCatalog.get(registraiton_name).set(thing_classes=["mass"])
-    CEM_metadata = MetadataCatalog.get(registraiton_name)
+    register_dataset(registraiton_name=registraiton_name)
+    
     # training configuration and weights
     config_file = repo_path / 'detection/training/data/config_files/fine_tuning_CEM.yaml'
     model_file = repo_path / 'data/models/model_final_R_101_omidb_30k_dbt9k_f12_gray.pth'
-
     cfg = get_cfg()
     cfg.merge_from_file(str(config_file))
     cfg.MODEL.WEIGHTS = str(model_file)
@@ -185,11 +189,10 @@ def main():
     cfg.SOLVER.MAX_ITER = iter_num #10000    # 300 iterations is enough for a toy dataset
     cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 512   # faster, and good enough for this toy dataset (default: 512)
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (mass).
-
     cfg.DATASETS.TRAIN = (registraiton_name,)
     cfg.DATASETS.TEST = ()
-
     os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
+    
     trainer = DefaultTrainer(cfg) # or Trainer(cfg)
     trainer.resume_or_load(resume=False)
     trainer.train()
