@@ -81,10 +81,10 @@ def main():
         model_file = repo_path / 'detection/training/data' / model_type / f'model_0014999.pth' # fine-tuned 2
     assert model_file.exists(), f"Model file not found in {model_file}"
     # special overrides
-    model_file = repo_path / 'detection/training/output/model_0014999.pth'
+    # model_file = repo_path / 'detection/training/output/model_0009999.pth'
     
     # saving paths
-    saving_name = 'synthetic_only'
+    saving_name = 'fine_tuned'
     output_dir = repo_path / 'detection/inference/results' / saving_name
     output_dir.mkdir(parents=True, exist_ok=True)
 
