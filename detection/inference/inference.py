@@ -73,13 +73,13 @@ def get_dicts(dataframe, im_dir):
 def main():
     # configuration model
     config_file = repo_path / 'data/models/config_trained_R_101_30k.yaml'
-    model_file = repo_path / 'data/models/model_final_R_101_omidb_30k_dbt9k_f12_gray.pth' # pure
+    # model_file = repo_path / 'data/models/model_final_R_101_omidb_30k_dbt9k_f12_gray.pth' # pure
     mod_num = 14
-    # model_file = repo_path / 'detection/training/output' / f'model_00{mod_num}999.pth' # fine-tuned 2
+    model_file = repo_path / 'detection/training/data/normal_fine-tuning' / f'model_00{mod_num}999.pth' # fine-tuned 2
     
     # saving paths
-    output_dir = repo_path / 'detection/inference/results' / 'pure_DBT'
-    # output_dir = repo_path / 'detection/inference/results' / 'fine_tuned'
+    # output_dir = repo_path / 'detection/inference/results' / 'pure_DBT'
+    output_dir = repo_path / 'detection/inference/results' / 'fine_tuned'
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # input data
