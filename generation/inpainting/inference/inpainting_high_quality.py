@@ -339,6 +339,7 @@ def main():
     counter.close()
     
     # save metadata
+    inpainter.df_synthetic['image_name'] = inpainter.df_synthetic['image_name'].str.strip() # clean spaces
     inpainter.df_synthetic.to_csv(inpainter.saving_dir / 'metadata.csv', index=False)
 
 if __name__ == '__main__':
