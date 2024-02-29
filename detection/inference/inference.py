@@ -81,7 +81,7 @@ def main():
         model_file = repo_path / 'detection/training/data' / model_type / f'model_0014999.pth' # fine-tuned 2
     assert model_file.exists(), f"Model file not found in {model_file}"
     # special overrides
-    model_file = repo_path / 'detection/training/output/model_0004999.pth'
+    model_file = repo_path / 'detection/training/output/model_0014999.pth'
     
     # saving paths
     saving_name = 'synthetic_only'
