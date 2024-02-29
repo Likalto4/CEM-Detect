@@ -149,10 +149,12 @@ class InpaintingGenerator:
 
 
         # get area 25th and 75th percentiles and ratio mean and std
-        q25, q75 = np.percentile(mask_areas, 25), np.percentile(mask_areas, 75)
+        # q25, q75 = np.percentile(mask_areas, 25), np.percentile(mask_areas, 75)
+        mean_area, std_area = np.mean(mask_areas), np.std(mask_areas)
         mean, std = np.mean(mask_ratios), np.std(mask_ratios)
 
-        area_range = (q25, q75)
+        # area_range = (q25, q75)
+        area_range = (mean_area - std_area, mean_area + std_area)
         ratio_range = (mean - std, mean + std)
 
         return area_range, ratio_range
@@ -271,7 +273,45 @@ class InpaintingGenerator:
         channel_num = 0
         self.current_inpainted[self.current_closeup_coords[1]:self.current_closeup_coords[3], self.current_closeup_coords[0]:self.current_closeup_coords[2]
             ] = synth_array[:,:,channel_num]
-        
+
+        # median correction
+        self.median_fix()
+
+    def median_fix(self, show=False):
+        # compare patch gray values and original patch values
+        original_patch = self.current_image[
+            self.current_closeup_coords[1]:self.current_closeup_coords[3],
+            self.current_closeup_coords[0]:self.current_closeup_coords[2]
+        ]
+        channel_num = 0
+        synthetic_patch = self.current_closup_lesion[:,:,channel_num]
+
+        # create masks
+        breast_mask = original_patch!=0 # all pixels in the foreground
+        lesion_mask = np.zeros_like(original_patch)
+        lesion_mask[self.current_bbox[1]:self.current_bbox[3], self.current_bbox[0]:self.current_bbox[2]] = 1
+        lesion_mask = lesion_mask!=1
+        statistical_mask = breast_mask & lesion_mask # intesrection of the masks
+        # get difference of pixels between the original patch and the synthetic patch using pixels only inside the statistical mask, with isgn
+        diff = original_patch.astype(np.float32) - synthetic_patch.astype(np.float32)
+        # extract as one dimentional array only the pixels inside the statistical mask
+        diff = diff[statistical_mask]
+        # compute median
+        median_corr = np.median(diff)
+        if show:
+            print(f'Median correction: {median_corr}')
+        # shift the synthetic patch to match the original patch using the median
+        synthetic_patch_shifted = synthetic_patch + median_corr
+
+        new_full_image = self.current_image.copy()
+        new_full_image[
+            self.current_closeup_coords[1]:self.current_closeup_coords[3],
+            self.current_closeup_coords[0]:self.current_closeup_coords[2]] = synthetic_patch_shifted
+        assert new_full_image.dtype == np.uint8
+        self.current_median_corr = median_corr
+        self.current_inpainted = new_full_image
+
+
     def show_synthetic_closup(self):
         fig, axs = plt.subplots(2, 2, figsize=(15, 15))
         axs[0,0].imshow(self.current_im_closup, cmap='gray')
