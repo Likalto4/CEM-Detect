@@ -83,7 +83,7 @@ class InpaintingGenerator:
 
     def get_lesion_bbox(self):
 
-        for _ in range(3): # try three times to find a bbox
+        for _ in range(5): # try three times to find a bbox
 
             # compute area stats
             area_range, ratio_range = self.compute_area_ratio()
@@ -150,11 +150,11 @@ class InpaintingGenerator:
 
         # get area 25th and 75th percentiles and ratio mean and std
         # q25, q75 = np.percentile(mask_areas, 25), np.percentile(mask_areas, 75)
-        mean_area, std_area = np.mean(mask_areas), np.std(mask_areas)
+        min_area, max_area = np.min(mask_areas), np.max(mask_areas)
         mean, std = np.mean(mask_ratios), np.std(mask_ratios)
 
         # area_range = (q25, q75)
-        area_range = (mean_area - std_area, mean_area + std_area)
+        area_range = (min_area, max_area)
         ratio_range = (mean - std, mean + std)
 
         return area_range, ratio_range
@@ -310,7 +310,6 @@ class InpaintingGenerator:
         assert new_full_image.dtype == np.uint8
         self.current_median_corr = median_corr
         self.current_inpainted = new_full_image
-
 
     def show_synthetic_closup(self):
         fig, axs = plt.subplots(2, 2, figsize=(15, 15))

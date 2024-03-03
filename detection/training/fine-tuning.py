@@ -158,8 +158,8 @@ def get_CEM_dicts(dataframe, im_dir):
 
 def register_dataset(registraiton_name:str):
     # paths
-    csv_meta_path = repo_path / 'detection/preprocessing/data/combined_datasets/simple_augmentation/metadata.csv' # <---- change
-    im_dir = repo_path / 'detection/preprocessing/data/combined_datasets/simple_augmentation/images' # <---- change
+    csv_meta_path = repo_path / 'detection/preprocessing/data/combined_datasets/improved_augmentation/metadata.csv' # <---- change
+    im_dir = repo_path / 'detection/preprocessing/data/combined_datasets/improved_augmentation/images' # <---- change
     # clean image_name column, no black spaces
     df = pd.read_csv(csv_meta_path)
     df['image_name'] = df['image_name'].str.strip()
