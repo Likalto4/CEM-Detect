@@ -69,7 +69,6 @@ def get_dicts(dataframe, im_dir):
 
         return dataset_dicts
 
-
 def main():
     # configuration model
     config_file = repo_path / 'data/models/config_trained_R_101_30k.yaml'
