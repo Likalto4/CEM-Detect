@@ -20,6 +20,7 @@ from detectron2.data import build_detection_test_loader
 from detectron2.utils.logger import setup_logger
 setup_logger()
 
+
 class lesion_detector:
     def __init__(self, cfg_path, model_path, thresh_score=0.5) -> None:
         assert model_path.exists(), f"Model file not found in {model_path}"
