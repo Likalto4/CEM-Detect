@@ -41,7 +41,8 @@ class InpaintingGenerator:
         self.metadata = pd.read_csv(repo_path / 'data/CDD-CESM/metadata' / 'normal_cases.csv')
 
     def set_generator(self, model_dir=None):
-        model_dir=repo_path / 'generation/inpainting/results/CEM-small_mass_split-1' if model_dir is None else model_dir
+        model_dir = repo_path / 'generation/inpainting/results/CEM-512_mass-correct_split_1' if model_dir is None else model_dir # <- change this line
+        # model_dir = repo_path / 'generation/inpainting/results/CEM-small_mass_split-1' if model_dir is None else model_dir
         # model_dir = 'runwayml/stable-diffusion-inpainting'
         self.pipe = DiffusionPipeline.from_pretrained(
             model_dir,
