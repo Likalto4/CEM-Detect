@@ -22,18 +22,42 @@ setup_logger()
 
 
 class lesion_detector:
-    def __init__(self, cfg_path, model_path, thresh_score=0.5) -> None:
+    """Class to handle the detection of lesions in images.
+    The user must define:
+    - the path to the configuration file
+    - the path to the model file
+    - the path to the inference metadata file
+    - the path to the directory containing the images to be tested
+    - the minimu threshold score for detection
+    """
+    def __init__(self, cfg_path, model_path, metadata_path:Path, im_dir:Path, thresh_score=0.5) -> None:
         assert model_path.exists(), f"Model file not found in {model_path}"
         self.cfg = get_cfg()
         self.cfg.merge_from_file(str(cfg_path))
         self.cfg.MODEL.WEIGHTS = str(model_path)
         self.cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = thresh_score
         self.predictor = DefaultPredictor(self.cfg)
-
         # input data
-        metadata_path = repo_path / 'data/CDD-CESM/metadata/bboxes/split_1/test_set.csv'
-        self.im_dir = repo_path / 'data/CDD-CESM/images/substracted'
+        self.im_dir = im_dir
         self.test_df = pd.read_csv(metadata_path)
+        # define image format from the content of im_dir
+        self.im_format = next(self.im_dir.glob('*')).suffix
+        # currents
+        self.c_im_name = None
+
+    def prepare_im_gt(self):
+        """Prepares the current image and ground truth for detection.
+        Attributes changed :
+        - self.c_im_array
+        - self.c_gt_bboxes
+        """
+        # prepare image
+        im_path = self.im_dir / f'{self.c_im_name}{self.im_format}'
+        self.c_im_array = cv.imread(str(im_path))
+        # prepare ground truth
+        im_bboxes = self.test_df[self.test_df['image_name']==self.c_im_name] # filter bboxes for this image
+        bboxes_info = [eval(bbox) for bbox in im_bboxes['bbox']] # get all regions bboxes
+        self.c_gt_bboxes = [[bbox[0], bbox[1], bbox[0]+bbox[2], bbox[1]+bbox[3]] for bbox in bboxes_info] # convert to x1, y1, x2, y2 format
 
     def predict(self, img_path):
         im = cv.imread(img_path)
