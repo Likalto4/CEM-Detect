@@ -8,7 +8,7 @@ tokenizer_name: null # str
 # data:
 instance_data_dir: /home/ricardo/projects/CEM-Detect/generation/inpainting/data/training_set/closeups/images/split_1 # <---- change
 instance_prompt: a mammogram with a mass lesion
-output_dir: /home/ricardo/projects/CEM-Detect/generation/inpainting/results/CEM-small_mass_split-1 # <---- change
+output_dir: /home/ricardo/projects/CEM-Detect/generation/inpainting/results/CEM-512_mass-correct_split_1 # <---- change
 # hub:
 push_to_hub: true
 hub_token: null
@@ -38,10 +38,10 @@ seed: 1337 # reproducibility seed
 resolution: 512
 center_crop: false # center or random crop # this is done independenly as preprocessing step
 train_text_encoder: true # train the text encoder
-train_batch_size: 8 # per device
-gradient_accumulation_steps: 1
+train_batch_size: 8 # per device   # <---- change
+gradient_accumulation_steps: 1     # <---- change
 num_train_epochs: 1
-max_train_steps: 3000 # overrides num_train_epochs
+max_train_steps: 2400 # overrides num_train_epochs    # <---- change
 learning_rate: 1.0e-6 # lr after (potential) warmup
 scale_lr: False #Scale the learning rate by the number of GPUs, gradient accumulation steps, and batch size
 lr_scheduler: constant
