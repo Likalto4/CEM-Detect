@@ -148,6 +148,7 @@ class lesion_detector:
         """
         # compute all ious between GT and predictions
         gt_pred_ious = pairwise_iou(boxes.Boxes(self.c_gt_bboxes), self.c_output.pred_boxes).numpy()
+        self.c_gt_pred_ious = gt_pred_ious
         if show:
             print(f'GT_num: {gt_pred_ious.shape[0]}, Pred_num: {gt_pred_ious.shape[1]}')
             print(gt_pred_ious)
@@ -211,3 +212,44 @@ class lesion_detector:
             self.TP_FP_dataframe = pd.concat([self.TP_FP_dataframe, TP_dataframe], ignore_index=True)
 
         return used_preds
+    
+    def compute_FP_counts(self, used_preds):
+        """Computes the number of False Positives for the current image.<br>
+        It is the continuation of the compute_TP_FN_counts method and must go after the latter.
+
+        Args:
+            used_preds (list): list of indices of the predictions used for the TP count, which are not considered for the FP
+
+        Attributes changed :
+        - self.TP_FP_dataframe: general dataframe with the TP and FP information
+        """
+        FP_dataframe = None
+        # count all FP cases
+        c_preds = self.c_output.scores
+        # case one: no predictions
+        if len(c_preds)==0:
+            # no predictions so nothing to do
+            pass
+        # case two: predictions available
+        else:
+            # remove the used predictions, if any
+            c_preds = np.delete(c_preds, used_preds) if len(used_preds)>0 else c_preds
+            c_gt_pred_ious = np.delete(self.c_gt_pred_ious, used_preds, axis=1) if len(used_preds)>0 else self.c_gt_pred_ious
+            # count the remaining predictions as FP
+            # if there are no remaining predictions, nothing to do
+            if len(c_preds)>0:
+                for pred_num in range(len(c_preds)): #<==Go through all the remaining predictions
+                    # create the dataframe
+                    c_FP_df = pd.DataFrame(
+                                {'image_name': self.c_im_name,
+                                'category': 'FP',
+                                'iou': c_gt_pred_ious[:,pred_num].max(), # the maximum iou with any GT, info only
+                                'score': c_preds[pred_num].item(),
+                                },
+                                index=[0]
+                                )
+                    FP_dataframe = pd.concat([FP_dataframe, c_FP_df], ignore_index=True)
+
+        # concat FP_frame with the general dataframe if it is not NOne
+        if FP_dataframe is not None:
+            self.TP_FP_dataframe = pd.concat([self.TP_FP_dataframe, FP_dataframe], ignore_index=True)         
