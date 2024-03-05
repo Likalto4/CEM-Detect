@@ -98,6 +98,7 @@ class lesion_detector:
         # metrics
         self.FN_count = 0 # overall False Negatives
         self.TP_FP_dataframe = None
+        self.froc_dataframe = None
 
     def prepare_im_gt(self):
         """Prepares the current image and ground truth for detection.
@@ -252,4 +253,27 @@ class lesion_detector:
 
         # concat FP_frame with the general dataframe if it is not NOne
         if FP_dataframe is not None:
-            self.TP_FP_dataframe = pd.concat([self.TP_FP_dataframe, FP_dataframe], ignore_index=True)         
+            self.TP_FP_dataframe = pd.concat([self.TP_FP_dataframe, FP_dataframe], ignore_index=True)   
+
+    def compute_FROC(self):
+        """computes the TPR and FPpI for the current self.TP_FP_dataframe. This is done after the TP, FP and FN counts are done.
+
+        Attributes changed :
+        - self.froc_dataframe: general dataframe with the TPR and FPpI information
+        
+        Returns:
+        - self.froc_dataframe: general dataframe with the TPR and FPpI information.
+        """
+        # order TP_FP dataframe by score
+        TP_FP_df = self.TP_FP_dataframe.sort_values(by='score', inplace=False, ascending=False).reset_index(drop=True)
+        # count number of TP
+        TP_FN_count = (TP_FP_df['category'] == 'TP').sum() + self.FN_count
+
+        # compute TPR iterating over the dataframe that is sorted by score
+        for iter in range(len(TP_FP_df)):
+            TP_FP_df.loc[iter, 'TPR'] = (TP_FP_df.loc[0:iter, 'category'] == 'TP').sum() / TP_FN_count
+            TP_FP_df.loc[iter, 'FPpI'] = (TP_FP_df.loc[0:iter, 'category'] == 'FP').sum() / len(self.test_df['image_name'].unique())
+        
+        self.froc_dataframe = TP_FP_df
+
+        return self.froc_dataframe
