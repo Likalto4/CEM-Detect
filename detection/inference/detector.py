@@ -15,73 +15,11 @@ import cv2 as cv
 from matplotlib import pyplot as plt
 from matplotlib import patches
 from detectron2.engine import DefaultPredictor
+from detectron2.structures import boxes, pairwise_iou
 from detectron2.config import get_cfg
 from detectron2.utils.logger import setup_logger
 
 setup_logger()
-
-class lesion_detector:
-    """Class to handle the detection of lesions in images.
-    The user must define:
-    - the path to the configuration file
-    - the path to the model file
-    - the path to the inference metadata file
-    - the path to the directory containing the images to be tested
-    - the minimu threshold score for detection
-    """
-    def __init__(self, cfg_path, model_path, metadata_path:Path, im_dir:Path, thresh_score=0.5) -> None:
-        assert model_path.exists(), f"Model file not found in {model_path}"
-        self.cfg = get_cfg()
-        self.cfg.merge_from_file(str(cfg_path))
-        self.cfg.MODEL.WEIGHTS = str(model_path)
-        self.cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = thresh_score
-        self.predictor = DefaultPredictor(self.cfg)
-        # input data
-        self.im_dir = im_dir
-        self.test_df = pd.read_csv(metadata_path)
-        # define image format from the content of im_dir
-        self.im_format = next(self.im_dir.glob('*')).suffix
-        # currents
-        self.c_im_name = None
-        self.c_gt_bboxes = None
-        self.c_output = None
-
-    def prepare_im_gt(self):
-        """Prepares the current image and ground truth for detection.
-        Attributes changed :
-        - self.c_im_array
-        - self.c_gt_bboxes
-        """
-        # prepare image
-        im_path = self.im_dir / f'{self.c_im_name}{self.im_format}'
-        self.c_im_array = cv.imread(str(im_path))
-        # prepare ground truth
-        im_bboxes = self.test_df[self.test_df['image_name']==self.c_im_name] # filter bboxes for this image
-        bboxes_info = [eval(bbox) for bbox in im_bboxes['bbox']] # get all regions bboxes
-        self.c_gt_bboxes = [[bbox[0], bbox[1], bbox[0]+bbox[2], bbox[1]+bbox[3]] for bbox in bboxes_info] # convert to x1, y1, x2, y2 format
-
-    def predict(self):
-        outputs = self.predictor(self.c_im_array)
-        self.c_output = outputs["instances"].to("cpu")
-
-    def show_c_predictions(self, figsize=(10,5)):
-        fig,ax = plt.subplots(1, 2, figsize=figsize)
-        fig.suptitle(self.c_im_name)
-        # GT
-        ax[0].imshow(self.c_im_array)
-        ax[0].set_title('Ground truth')
-        for bbox in self.c_gt_bboxes:
-            rect = patches.Rectangle((bbox[0],bbox[1]), width = bbox[2]-bbox[0], height = bbox[3]-bbox[1],linewidth=1,edgecolor='r',facecolor='none')
-            ax[0].add_patch(rect)
-        # Pred
-        ax[1].imshow(self.c_im_array)
-        ax[1].set_title('Predicted')
-        for i, bbox in enumerate(self.c_output.pred_boxes.tensor.numpy()):
-            rect = patches.Rectangle((bbox[0],bbox[1]), width = bbox[2]-bbox[0], height = bbox[3]-bbox[1],linewidth=1,edgecolor='r',facecolor='none')
-            ax[1].add_patch(rect)
-            # add score
-            ax[1].text(bbox[0],bbox[1],f'{self.c_output.scores[i]:.2f}', fontsize=6, color='w')
-        plt.show()
 
 ##### post processing filtering functions (outside of the class for now)
 
@@ -127,3 +65,149 @@ def post_process_pred(out):
     new_out.scores = predicted_scores
 
     return new_out
+
+class lesion_detector:
+    """Class to handle the detection of lesions in images.
+    The user must define:
+    - the path to the configuration file
+    - the path to the model file
+    - the path to the inference metadata file
+    - the path to the directory containing the images to be tested
+    - the minimu threshold score for detection
+    """
+    def __init__(self, cfg_path, model_path, metadata_path:Path, im_dir:Path, thresh_score=0.5) -> None:
+        assert model_path.exists(), f"Model file not found in {model_path}"
+        self.cfg = get_cfg()
+        self.cfg.merge_from_file(str(cfg_path))
+        self.cfg.MODEL.WEIGHTS = str(model_path)
+        self.cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = thresh_score
+        self.predictor = DefaultPredictor(self.cfg)
+        # input data
+        self.im_dir = im_dir
+        self.test_df = pd.read_csv(metadata_path)
+        # define image format from the content of im_dir
+        self.im_format = next(self.im_dir.glob('*')).suffix
+        # currents
+        self.c_im_name = None
+        self.c_gt_bboxes = None
+        self.c_output = None
+
+    def start_metrics(self):
+        """start from zero the metrics for the current test.
+        """
+        # metrics
+        self.FN_count = 0 # overall False Negatives
+        self.TP_FP_dataframe = None
+
+    def prepare_im_gt(self):
+        """Prepares the current image and ground truth for detection.
+        Attributes changed :
+        - self.c_im_array
+        - self.c_gt_bboxes (x1, y1, x2, y2 format)
+        """
+        # prepare image
+        im_path = self.im_dir / f'{self.c_im_name}{self.im_format}'
+        self.c_im_array = cv.imread(str(im_path))
+        # prepare ground truth
+        im_bboxes = self.test_df[self.test_df['image_name']==self.c_im_name] # filter bboxes for this image
+        bboxes_info = [eval(bbox) for bbox in im_bboxes['bbox']] # get all regions bboxes
+        self.c_gt_bboxes = [[bbox[0], bbox[1], bbox[0]+bbox[2], bbox[1]+bbox[3]] for bbox in bboxes_info] # convert to x1, y1, x2, y2 format
+
+    def predict(self):
+        outputs = self.predictor(self.c_im_array)
+        self.c_output = outputs["instances"].to("cpu")
+
+    def show_c_predictions(self, figsize=(10,5)):
+        fig,ax = plt.subplots(1, 2, figsize=figsize)
+        fig.suptitle(self.c_im_name)
+        # GT
+        ax[0].imshow(self.c_im_array)
+        ax[0].set_title('Ground truth')
+        for bbox in self.c_gt_bboxes:
+            rect = patches.Rectangle((bbox[0],bbox[1]), width = bbox[2]-bbox[0], height = bbox[3]-bbox[1],linewidth=1,edgecolor='r',facecolor='none')
+            ax[0].add_patch(rect)
+        # Pred
+        ax[1].imshow(self.c_im_array)
+        ax[1].set_title('Predicted')
+        for i, bbox in enumerate(self.c_output.pred_boxes.tensor.numpy()):
+            rect = patches.Rectangle((bbox[0],bbox[1]), width = bbox[2]-bbox[0], height = bbox[3]-bbox[1],linewidth=1,edgecolor='r',facecolor='none')
+            ax[1].add_patch(rect)
+            # add score
+            ax[1].text(bbox[0],bbox[1],f'{self.c_output.scores[i]:.2f}', fontsize=6, color='w')
+        plt.show()
+
+    def compute_TP_FN_counts(self, show=False):
+        """Computes the number of True Positives and False Negatives for the current image.
+        
+        Attributes changed :
+        - self.FN_count: general False Negatives count
+        - self.TP_FP_dataframe: general dataframe with the TP and FP information
+
+        Returns:
+        - used_preds: list of indices of the predictions used for the TP count, which are not considered for the FP
+        """
+        # compute all ious between GT and predictions
+        gt_pred_ious = pairwise_iou(boxes.Boxes(self.c_gt_bboxes), self.c_output.pred_boxes).numpy()
+        if show:
+            print(f'GT_num: {gt_pred_ious.shape[0]}, Pred_num: {gt_pred_ious.shape[1]}')
+            print(gt_pred_ious)
+
+        # active outputs
+        TP_dataframe = None
+        used_preds = []
+        
+        ### Compute the TP
+        for gt_num, _ in enumerate(self.c_gt_bboxes): #<--- go through each GT sample, the actual coordinates are not used
+            # Case:1 FN if no prediction has iou >= 0.3
+            if np.all(gt_pred_ious[gt_num] < 0.3):
+                self.FN_count += 1
+                continue
+            # Case:2 TP with only one prediction with iou >= 0.3
+            elif np.sum(gt_pred_ious[gt_num] >= 0.3) == 1:
+                # get the index of the prediction with iou >= 0.3
+                pred_num = np.argmax(gt_pred_ious[gt_num])
+                # get the score of the prediction
+                score = self.c_output.scores[pred_num]
+                # save in the dataframe
+                TP_FP_gt_df = pd.DataFrame(
+                    {'image_name': self.c_im_name,
+                    'category': 'TP',
+                    'iou': gt_pred_ious[gt_num, pred_num],
+                    'score': score.item(),
+                    },
+                    index=[0]
+                    )
+                TP_dataframe = pd.concat([TP_dataframe, TP_FP_gt_df])
+                # remove the prediction from the matrix
+                gt_pred_ious = np.delete(gt_pred_ious, pred_num, axis=1)
+                # save the position of the used prediction
+                used_preds.append(pred_num)
+                continue
+            # Case:3 TP with multiple predictions with iou >= 0.3
+            elif np.sum(gt_pred_ious[gt_num] >= 0.3) > 1:
+                # get the indices of the predictions with iou >= 0.3
+                pred_nums = np.where(gt_pred_ious[gt_num] >= 0.3)
+                # get the scores of the predictions
+                scores = self.c_output.scores[pred_nums]
+                # select the prediction with the highest score, usually the first, given the detectron2 output
+                selected_pred_num = np.argmax(scores)
+                # save in the dataframe
+                TP_FP_gt_df = pd.DataFrame(
+                    {'image_name': self.c_im_name,
+                    'category': 'TP',
+                    'iou': gt_pred_ious[gt_num, selected_pred_num],
+                    'score': scores[np.argmax(scores)].item(),
+                    },
+                    index=[0]
+                    )
+                TP_dataframe = pd.concat([TP_dataframe, TP_FP_gt_df])
+                # remove all the predictions from the matrix
+                gt_pred_ious = np.delete(gt_pred_ious, pred_nums, axis=1)
+                # save the position of the used predictions
+                used_preds.extend(pred_nums)
+        
+        # after finishing all GT, we can concat this image dataframe to the global one, only if there are any TP
+        if TP_dataframe is not None:
+            self.TP_FP_dataframe = pd.concat([self.TP_FP_dataframe, TP_dataframe], ignore_index=True)
+
+        return used_preds
