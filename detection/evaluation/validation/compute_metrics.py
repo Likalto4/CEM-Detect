@@ -64,7 +64,7 @@ def main():
         FROC_info_dir = repo_path / 'detection/evaluation/data/validation/split_1' / model_type_name
         
         # saving_AUFROCs and sensitivity
-        AUFROC_dir = FROC_info_dir.parent / 'AUFROCs'
+        AUFROC_dir = FROC_info_dir.parent / 'AUFROC'
         Sen_mean_dir = FROC_info_dir.parent / 'sensitivity'
         AUFROC_dir.mkdir(parents=True, exist_ok=True)
         Sen_mean_dir.mkdir(parents=True, exist_ok=True)
@@ -82,13 +82,13 @@ def main():
 
             # compute metrics
             AUFROC_value = AUFROC_computing(froc_info)
-            AUFROC_df = pd.concat([AUFROC_df, pd.DataFrame({'model_name': [model_name], 'AUFROC': [AUFROC_value]})], ignore_index=True)
+            AUFROC_df = pd.concat([AUFROC_df, pd.DataFrame({'model_name': [model_name], 'metric': [AUFROC_value]})], ignore_index=True)
             # sensitivity
             _, sen_mean = computing_sensitivity_at_FPpI(froc_info)
-            Sen_mean_df = pd.concat([Sen_mean_df, pd.DataFrame({'model_name': [model_name], 'sensitivity_mean': [sen_mean]})], ignore_index=True)
+            Sen_mean_df = pd.concat([Sen_mean_df, pd.DataFrame({'model_name': [model_name], 'metric': [sen_mean]})], ignore_index=True)
         # sort by metric
-        AUFROC_df = AUFROC_df.sort_values(by='AUFROC', ascending=False)
-        Sen_mean_df = Sen_mean_df.sort_values(by='sensitivity_mean', ascending=False)
+        AUFROC_df = AUFROC_df.sort_values(by='metric', ascending=False)
+        Sen_mean_df = Sen_mean_df.sort_values(by='metric', ascending=False)
         
         # save
         AUFROC_df.to_csv(AUFROC_dir / f'{FROC_info_dir.name}.csv', index=False)

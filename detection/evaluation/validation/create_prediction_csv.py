@@ -9,19 +9,12 @@ sys.path.insert(0,str(repo_path)) if str(repo_path) not in sys.path else None
 os.environ['CUDA_DEVICE_ORDER']='PCI_BUS_ID'
 os.environ['CUDA_VISIBLE_DEVICES']='0'
 
-import numpy as np
-import cv2 as cv
-import pandas as pd
-from matplotlib import pyplot as plt
-from matplotlib import patches
-from detectron2.structures import pairwise_iou, boxes
-
-from detection.inference.detector import lesion_detector, post_process_pred
+from detection.inference.detector import lesion_detector
 
 def main():
 
     #### configuration: (ediatable)
-    split_type_dir = repo_path / Path('detection/training/results/split_1')
+    split_type_dir = repo_path / Path('detection/training/results/split_1_old')
     ###
 
     # model inputs
