@@ -41,8 +41,8 @@ def AUFROC_computing(froc_info, FPpI_limit=1.0):
     
 
 def computing_sensitivity_at_FPpI(froc_info):
-    # compute sensitivity at 1/4, 1/2, 1, 2, 4 FPpI
-    sen_at = [1/2, 1, 2, 3, 4]
+    # compute sensitivity at:
+    sen_at = [1/4, 1/2, 1]
     sensitivity_df = None
     for FPpI in sen_at:
         c_sen = np.interp(x=FPpI, xp=froc_info['FPpI'], fp=froc_info['TPR'])
@@ -86,6 +86,10 @@ def main():
             # sensitivity
             _, sen_mean = computing_sensitivity_at_FPpI(froc_info)
             Sen_mean_df = pd.concat([Sen_mean_df, pd.DataFrame({'model_name': [model_name], 'sensitivity_mean': [sen_mean]})], ignore_index=True)
+        # sort by metric
+        AUFROC_df = AUFROC_df.sort_values(by='AUFROC', ascending=False)
+        Sen_mean_df = Sen_mean_df.sort_values(by='sensitivity_mean', ascending=False)
+        
         # save
         AUFROC_df.to_csv(AUFROC_dir / f'{FROC_info_dir.name}.csv', index=False)
         Sen_mean_df.to_csv(Sen_mean_dir / f'{FROC_info_dir.name}.csv', index=False)
