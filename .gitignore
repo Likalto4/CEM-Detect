@@ -3,6 +3,8 @@ data/
 results/
 wandb/
 output/
+# momentary
+output_synth/
 generation/bbridge/data_preparation/TransformParameters.0.txt
 
 BBDM/

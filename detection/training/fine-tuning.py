@@ -157,9 +157,15 @@ def get_CEM_dicts(dataframe, im_dir):
         return dataset_dicts
 
 def register_dataset(registraiton_name:str):
-    # paths
-    csv_meta_path = repo_path / 'detection/preprocessing/data/combined_datasets/split_1/improved_augmentation/metadata.csv' # <---- change
-    im_dir = repo_path / 'detection/preprocessing/data/combined_datasets/split_1/improved_augmentation/images' # <---- change
+    # input paths
+    # csv_meta_path = repo_path / 'detection/preprocessing/data/combined_datasets/split_1/improved_augmentation/metadata.csv' # <---- change
+    # csv_meta_path = repo_path / 'data/CDD-CESM/metadata/bboxes/split_1/train_set.csv'
+    csv_meta_path = repo_path / 'generation/inpainting/data/split_1/improved_normal/metadata.csv'
+
+    # im_dir = repo_path / 'detection/preprocessing/data/combined_datasets/split_1/improved_augmentation/images' # <---- change
+    # im_dir = repo_path / 'data/CDD-CESM/images/substracted'
+    im_dir = repo_path / 'generation/inpainting/data/split_1/improved_normal/images'
+    
     # clean image_name column, no black spaces
     df = pd.read_csv(csv_meta_path)
     df['image_name'] = df['image_name'].str.strip()
@@ -178,7 +184,7 @@ def main():
     register_dataset(registraiton_name=registraiton_name)
     
     # training configuration and weights
-    config_file = repo_path / 'detection/training/data/config_files/fine_tuning_CEM.yaml'
+    config_file = repo_path / 'detection/training/config_files/fine_tuning_CEM.yaml'
     model_file = repo_path / 'data/models/model_final_R_101_omidb_30k_dbt9k_f12_gray.pth'
     cfg = get_cfg()
     cfg.merge_from_file(str(config_file))

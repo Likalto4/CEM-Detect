@@ -9,7 +9,7 @@ sys.path.insert(0,str(repo_path)) if str(repo_path) not in sys.path else None
 from tqdm import tqdm
 from generation.inpainting.inpainter import InpaintingGenerator
 
-number_samples = 415            
+number_samples = 312           
 
 def main():
     inpainter = InpaintingGenerator(saving_dir= repo_path / 'generation/inpainting/data/split_1/improved_normal') #<-- change this
