@@ -180,15 +180,15 @@ class lesion_detector:
                     index=[0]
                     )
                 TP_dataframe = pd.concat([TP_dataframe, TP_FP_gt_df])
-                # remove the prediction from the matrix
-                gt_pred_ious = np.delete(gt_pred_ious, pred_num, axis=1)
+                # # remove the prediction from the matrix                   ## <- rmeoving from the matrix is a bug!
+                # gt_pred_ious = np.delete(gt_pred_ious, pred_num, axis=1) ## this will make losing track of the actual position of the used predictions
                 # save the position of the used prediction
                 used_preds.append(pred_num)
                 continue
             # Case:3 TP with multiple predictions with iou >= 0.3
             elif np.sum(gt_pred_ious[gt_num] >= 0.3) > 1:
                 # get the indices of the predictions with iou >= 0.3
-                pred_nums = np.where(gt_pred_ious[gt_num] >= 0.3)
+                pred_nums = np.where(gt_pred_ious[gt_num] >= 0.3)[0]
                 # get the scores of the predictions
                 scores = self.c_output.scores[pred_nums]
                 # select the prediction with the highest score, usually the first, given the detectron2 output
@@ -204,13 +204,16 @@ class lesion_detector:
                     )
                 TP_dataframe = pd.concat([TP_dataframe, TP_FP_gt_df])
                 # remove all the predictions from the matrix
-                gt_pred_ious = np.delete(gt_pred_ious, pred_nums, axis=1)
+                # gt_pred_ious = np.delete(gt_pred_ious, pred_nums, axis=1) # <---- same as above
                 # save the position of the used predictions
-                used_preds.extend(pred_nums)
+                used_preds.extend(pred_nums.tolist())
         
         # after finishing all GT, we can concat this image dataframe to the global one, only if there are any TP
         if TP_dataframe is not None:
             self.TP_FP_dataframe = pd.concat([self.TP_FP_dataframe, TP_dataframe], ignore_index=True)
+
+        # remove duplicates from the used_preds
+        used_preds = list(set(used_preds))
 
         return used_preds
     
