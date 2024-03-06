@@ -21,6 +21,11 @@ from PIL import Image
 from diffusers import DPMSolverMultistepScheduler, DiffusionPipeline
 import torch
 
+# TODO: avoid manual changes in:
+# - model_dir in set_generator
+# - training_mask_path in compute_area_ratio
+# - area and ratio in compute_area_ratio
+
 # create class for the generation of high resolution inpanted mammograms
 class InpaintingGenerator:
     """Generator of inpainted lesions
@@ -41,9 +46,8 @@ class InpaintingGenerator:
         self.metadata = pd.read_csv(repo_path / 'data/CDD-CESM/metadata' / 'normal_cases.csv')
 
     def set_generator(self, model_dir=None):
-        model_dir = repo_path / 'generation/inpainting/results/CEM-512_mass-correct_split_1' if model_dir is None else model_dir # <- change this line
-        # model_dir = repo_path / 'generation/inpainting/results/CEM-small_mass_split-1' if model_dir is None else model_dir
-        # model_dir = 'runwayml/stable-diffusion-inpainting'
+        # model_dir = repo_path / 'generation/inpainting/results/CEM-512_mass-correct_split_1' if model_dir is None else model_dir # <- change this line
+        model_dir = repo_path / 'generation/inpainting/results/CEM-small_mass_split-1' if model_dir is None else model_dir
         self.pipe = DiffusionPipeline.from_pretrained(
             model_dir,
             safety_checker=None,
@@ -136,7 +140,7 @@ class InpaintingGenerator:
             tuple: area and ratio statistics
         """
 
-        training_mask_path = repo_path  /'data/CDD-CESM/metadata/bboxes/split_1/train_set.csv'
+        training_mask_path = repo_path  / 'data/CDD-CESM/metadata/bboxes/split_1_old/train_set.csv' # <---- change statistics between full train/val or just train
         train_set = pd.read_csv(training_mask_path)
 
         mask_areas = []
@@ -148,14 +152,15 @@ class InpaintingGenerator:
                 mask_areas.append(bbox[2]*bbox[3])
                 mask_ratios.append(bbox[3]/bbox[2])
 
+        # TODO: define a more elegant way of deciding the rangeof the area and ratio #<---- change for area and ratio
 
         # get area 25th and 75th percentiles and ratio mean and std
-        # q25, q75 = np.percentile(mask_areas, 25), np.percentile(mask_areas, 75)
-        min_area, max_area = np.min(mask_areas), np.max(mask_areas)
+        q25, q75 = np.percentile(mask_areas, 25), np.percentile(mask_areas, 75)
+        # min_area, max_area = np.min(mask_areas), np.max(mask_areas)
         mean, std = np.mean(mask_ratios), np.std(mask_ratios)
 
-        # area_range = (q25, q75)
-        area_range = (min_area, max_area)
+        area_range = (q25, q75)
+        # area_range = (min_area, max_area)
         ratio_range = (mean - std, mean + std)
 
         return area_range, ratio_range

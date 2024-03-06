@@ -12,7 +12,7 @@ from generation.inpainting.inpainter import InpaintingGenerator
 number_samples = 312           
 
 def main():
-    inpainter = InpaintingGenerator(saving_dir= repo_path / 'generation/inpainting/data/split_1/improved_normal') #<-- change this
+    inpainter = InpaintingGenerator(saving_dir= repo_path / 'generation/inpainting/data/split_1_wVal/medium_area_normal') #<-- change this
     inpainter.set_generator()
     inpainter.start_metadata()
 
