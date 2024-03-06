@@ -21,9 +21,9 @@ from detection.inference.detector import lesion_detector, post_process_pred
 def main():
 
     #### configuration: (ediatable)
-    split_type_dir = repo_path / Path('detection/training/results/split_1_old')
+    split_type_dir = repo_path / Path('detection/training/results/split_1')
     ###
-    
+
     # model inputs
     config_file = repo_path / 'detection/training/config_files/fine_tuning_CEM.yaml'
     min_score = 0.1 # minimum score threshold to keep the prediction
