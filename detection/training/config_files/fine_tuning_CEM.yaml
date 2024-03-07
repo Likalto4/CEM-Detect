@@ -270,15 +270,15 @@ MODEL:
     NAME: SemSegFPNHead
     NORM: GN
     NUM_CLASSES: 54
-  WEIGHTS: ./output_synth/model_final_R_101_CEM_30k.pth # <-- change saving for multiple runnings
-OUTPUT_DIR: ./output_synth # <-- change saving for multiple runnings
+  WEIGHTS: ./output/model_final_R_101_CEM_30k.pth # irrelevant (overriden in code)
+OUTPUT_DIR: ./real_and_free-area # <-- change saving for multiple runnings
 SEED: -1
 SOLVER:
   AMP:
     ENABLED: false
   BASE_LR: 0.00025
   BIAS_LR_FACTOR: 1.0
-  CHECKPOINT_PERIOD: 2500
+  CHECKPOINT_PERIOD: 80
   CLIP_GRADIENTS:
     CLIP_TYPE: value
     CLIP_VALUE: 1.0

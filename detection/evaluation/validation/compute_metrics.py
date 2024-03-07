@@ -42,7 +42,7 @@ def AUFROC_computing(froc_info, FPpI_limit=1.0):
 
 def computing_sensitivity_at_FPpI(froc_info):
     # compute sensitivity at:
-    sen_at = [1/4, 1/2, 1]
+    sen_at = [1/2, 1, 2, 3]
     sensitivity_df = None
     for FPpI in sen_at:
         c_sen = np.interp(x=FPpI, xp=froc_info['FPpI'], fp=froc_info['TPR'])
@@ -55,7 +55,7 @@ def computing_sensitivity_at_FPpI(froc_info):
 
 def main():
     #### configuration: (ediatable)
-    split_name = 'split_1_old'
+    split_name = 'standard_split_wVal'
     ###
     split_type_dir = repo_path / Path(f'detection/training/results/{split_name}')
     model_type_names = [f.name for f in split_type_dir.iterdir() if f.is_dir()]

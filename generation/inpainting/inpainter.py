@@ -44,6 +44,8 @@ class InpaintingGenerator:
         # data
         self.im_dir = repo_path / 'data/CDD-CESM/images/substracted'
         self.metadata = pd.read_csv(repo_path / 'data/CDD-CESM/metadata' / 'normal_cases.csv')
+        # repeat metadata 3 times underneath
+        self.metadata = pd.concat([self.metadata]*3, ignore_index=True)
 
     def set_generator(self, model_dir=None):
         # model_dir = repo_path / 'generation/inpainting/results/CEM-512_mass-correct_split_1' if model_dir is None else model_dir # <- change this line
@@ -156,11 +158,11 @@ class InpaintingGenerator:
 
         # get area 25th and 75th percentiles and ratio mean and std
         q25, q75 = np.percentile(mask_areas, 25), np.percentile(mask_areas, 75)
-        # min_area, max_area = np.min(mask_areas), np.max(mask_areas)
+        min_area, max_area = np.min(mask_areas), np.max(mask_areas)
         mean, std = np.mean(mask_ratios), np.std(mask_ratios)
 
-        area_range = (q25, q75)
-        # area_range = (min_area, max_area)
+        # area_range = (q25, q75)
+        area_range = (min_area, max_area)
         ratio_range = (mean - std, mean + std)
 
         return area_range, ratio_range
