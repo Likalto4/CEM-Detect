@@ -55,13 +55,13 @@ def computing_sensitivity_at_FPpI(froc_info):
 
 def main():
     #### configuration: (ediatable)
-    split_type_dir = repo_path / Path('detection/training/results/split_1') #<-- coming from the create_prediction_csv.py
+    split_name = 'split_1_old'
     ###
-    
+    split_type_dir = repo_path / Path(f'detection/training/results/{split_name}')
     model_type_names = [f.name for f in split_type_dir.iterdir() if f.is_dir()]
     
     for model_type_name in model_type_names:
-        FROC_info_dir = repo_path / 'detection/evaluation/data/validation/split_1' / model_type_name
+        FROC_info_dir = repo_path / f'detection/evaluation/data/validation/{split_name}' / model_type_name
         
         # saving_AUFROCs and sensitivity
         AUFROC_dir = FROC_info_dir.parent / 'AUFROC'
