@@ -135,6 +135,10 @@ class lesion_detector:
             ax[1].add_patch(rect)
             # add score
             ax[1].text(bbox[0],bbox[1],f'{self.c_output.scores[i]:.2f}', fontsize=6, color='w')
+        # remove axis labels
+        for a in ax:
+            a.axis('off')
+        fig.tight_layout()
         plt.show()
 
     def compute_TP_FN_counts(self, show=False):

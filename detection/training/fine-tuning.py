@@ -158,12 +158,12 @@ def get_CEM_dicts(dataframe, im_dir):
 
 def register_dataset(registraiton_name:str):
     # input paths
-    # csv_meta_path = repo_path / 'data/CDD-CESM/metadata/bboxes/split_1/super_reduced_train_set.csv' # standard fine tuning
-    csv_meta_path = repo_path / 'detection/preprocessing/data/combined_datasets/split_1_wVal_super-reduced/real_and_free-area/metadata.csv'
+    csv_meta_path = repo_path / 'data/CDD-CESM/metadata/bboxes/split_1/super_reduced_train_set.csv' # standard fine tuning
+    # csv_meta_path = repo_path / 'detection/preprocessing/data/combined_datasets/split_1_wVal_super-reduced/real_and_free-area_super-reduced/metadata.csv'
     # csv_meta_path = repo_path / 'detection/preprocessing/data/combined_datasets/split_1_wVal/real_and_medium_area_normal/metadata.csv' # <---- change
 
-    # im_dir = repo_path / 'data/CDD-CESM/images/substracted'
-    im_dir = repo_path / 'detection/preprocessing/data/combined_datasets/split_1_wVal_super-reduced/real_and_free-area/images'
+    im_dir = repo_path / 'data/CDD-CESM/images/substracted'
+    # im_dir = repo_path / 'detection/preprocessing/data/combined_datasets/split_1_wVal_super-reduced/real_and_free-area_super-reduced/images'
     # im_dir = repo_path / 'detection/preprocessing/data/combined_datasets/split_1_wVal/real_and_medium_area_normal/images' # <---- change
     
     # clean image_name column, no black spaces
@@ -177,7 +177,7 @@ def register_dataset(registraiton_name:str):
 
 def main():
     # parameters
-    iter_num = 1000
+    iter_num = 3000
     
     # dataset
     registraiton_name = "CEM_train"

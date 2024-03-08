@@ -14,13 +14,14 @@ from detection.inference.detector import lesion_detector
 def main():
 
     #### configuration: (ediatable)
-    split_name = 'super_reduced_few_shots'
+    split_name = 'split_1'
+    min_score = 0.1 # minimum score threshold to keep the prediction
     ###
 
     split_type_dir = repo_path / Path(f'detection/training/results/{split_name}')
     # model inputs
     config_file = repo_path / 'detection/training/config_files/fine_tuning_CEM.yaml'
-    min_score = 0.1 # minimum score threshold to keep the prediction
+    print(f'Using a minimum score of {min_score} for the predictions')
 
     # validation data inputs
     im_dir = repo_path / 'data/CDD-CESM/images/substracted' # images directory (can contain other not only test)
@@ -31,7 +32,7 @@ def main():
     for model_type_dir in model_type_dirs:
     
         # csv saving with FROC info
-        saving_dir = repo_path / 'detection/evaluation/data/validation' / model_type_dir.parent.name / model_type_dir.name
+        saving_dir = repo_path / 'detection/evaluation/data/validation' / model_type_dir.parent.name / f'{model_type_dir.name}_{min_score}'
         saving_dir.mkdir(parents=True, exist_ok=True)
 
         # collect all possible model steps
