@@ -1,6 +1,7 @@
 comparisons/
 data/
 results/
+results_original_BBDM
 wandb/
 output/
 # momentary
