@@ -1,5 +1,14 @@
+comparisons/
 data/
+results/
+results_original_BBDM
+wandb/
+output/
+# momentary
+output_synth/
+generation/bbridge/data_preparation/TransformParameters.0.txt
 
+BBDM/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
