@@ -271,7 +271,7 @@ MODEL:
     NORM: GN
     NUM_CLASSES: 54
   WEIGHTS: ./output/model_final_R_101_CEM_30k.pth # irrelevant (overriden in code)
-OUTPUT_DIR: ./normal_fine-tuning # <-- change saving for multiple runnings
+OUTPUT_DIR: ./trial # <-- change saving for multiple runnings
 SEED: -1
 SOLVER:
   AMP:
