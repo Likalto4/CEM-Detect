@@ -49,7 +49,7 @@ class InpaintingGenerator:
 
     def set_generator(self, model_dir=None):
         # model_dir = repo_path / 'generation/inpainting/results/CEM-512_mass-correct_split_1' if model_dir is None else model_dir # <- change this line
-        model_dir = repo_path / 'generation/inpainting/results/CEM-small_mass_split-1' if model_dir is None else model_dir
+        model_dir = 'Likalto4/CEM-small_mass_split-1' if model_dir is None else model_dir
         self.pipe = DiffusionPipeline.from_pretrained(
             model_dir,
             safety_checker=None,
@@ -142,7 +142,7 @@ class InpaintingGenerator:
             tuple: area and ratio statistics
         """
 
-        training_mask_path = repo_path  / 'data/CDD-CESM/metadata/bboxes/split_1_old/train_set.csv' # <---- change statistics between full train/val or just train
+        training_mask_path = repo_path  / 'data/CDD-CESM/metadata/bboxes/split_1_noval/train_set.csv' # <---- change statistics between full train/val or just train
         train_set = pd.read_csv(training_mask_path)
 
         mask_areas = []
@@ -239,7 +239,7 @@ class InpaintingGenerator:
         fig.suptitle('Random selection of closeup and lesion bbox')
         plt.show()
 
-    def synthesize_lesion(self, diffusion_steps=50, guidance_scale=2, seed = None):
+    def synthesize_lesion(self, diffusion_steps=50, guidance_scale=2, seed = None, median_corr=True):
         """Synthesizes lesion in closeup and in final image
         Main attributes created:
         - self.current_closup_lesion: np.array
@@ -283,7 +283,7 @@ class InpaintingGenerator:
             ] = synth_array[:,:,channel_num]
 
         # median correction
-        self.median_fix()
+        self.median_fix() if median_corr else None
 
     def median_fix(self, show=False):
         # compare patch gray values and original patch values

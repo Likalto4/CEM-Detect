@@ -99,9 +99,18 @@ class patient_CDD(dataset_CDD_CESM):
     def __repr__(self) -> str:
         return f'Patient {self.patient_id} with {len(self.metadata)} images'
     
-    def set_image(self, show_status:bool=True , mode:str =None, view:str = None, laterality:str = None):
+    def set_image(self, step_num:int = 1 ,show_status:bool=True , mode:str =None, view:str = None, laterality:str = None):
+        """set image as attributes of the object
+
+        Args:
+            step_num (int, optional): The number of row advances. Defaults to 1.
+            show_status (bool, optional): _description_. Defaults to True.
+            mode (str, optional): _description_. Defaults to None.
+            view (str, optional): _description_. Defaults to None.
+            laterality (str, optional): _description_. Defaults to None.
+        """
         assert len(self.metadata) > 0, 'No images found for this patient in this metadata'
-        self.row_counter += 1
+        self.row_counter += step_num
         # access the row accordint to row_counter
         im_row = self.metadata.iloc[self.row_counter]
         # set attributes of current image
@@ -222,9 +231,9 @@ class patient_CDD(dataset_CDD_CESM):
 
         return center
     
-    def plot_annotations(self, flip:bool = False):
+    def plot_annotations(self, figsize=(14,7)):
         image = self.get_array(flip=False, plot=False)
-        fig, ax = plt.subplots(1,1, figsize=(14,7))
+        fig, ax = plt.subplots(1,1, figsize=figsize)
         ax.imshow(image)
         ax.set_title(f'Pat_{self.image_path.stem}, findings: {self.image_findings}\nTags: {self.image_tags}, {self.image_num_annotations} regions\n \
         {self.image_metadata["Pathology Classification/ Follow up"].values[0]}')
