@@ -44,3 +44,39 @@ The pipeline can be divided in two sections: image generation and lesion detecti
 The CDD-CESM dataset is publicly available and further information can be found in [this link](https://www.cancerimagingarchive.net/collection/cdd-cesm/). The SET-Mex dataset is a private dataset and is not publicly available.
 
 ## Synthetic data
+The synthetic data used in this work can be found in the Hugging Face dataset repository [here](https://huggingface.co/datasets/Likalto4/CEM_synthetic_data).
+
+## Citation
+
+Considering citing this work if you find it useful:
+
+```
+@InProceedings{10.1007/978-3-031-77789-9_22,
+author="Montoya-del-Angel, Ricardo
+and Elbatel, Marawan
+and Castillo-Lopez, Jorge Patricio
+and Villase{\~{n}}or-Navarro, Yolanda
+and Brandan, Maria-Ester
+and Marti, Robert",
+editor="Mann, Ritse M.
+and Zhang, Tianyu
+and Tan, Tao
+and Han, Luyi
+and Truhn, Danial
+and Li, Shuo
+and Gao, Yuan
+and Doyle, Shannon
+and Mart{\'i} Marly, Robert
+and Kather, Jakob Nikolas
+and Pinker-Domenig, Katja
+and Wu, Shandong
+and Litjens, Geert",
+title="ELK: Enhanced Learning Through Cross-Modal Knowledge Transfer for Lesion Detection in Limited-Sample Contrast-Enhanced Mammography Datasets",
+booktitle="Artificial Intelligence and Imaging for Diagnostic and Treatment Challenges in Breast Care",
+year="2025",
+publisher="Springer Nature Switzerland",
+address="Cham",
+pages="221--231",
+isbn="978-3-031-77789-9"
+}
+```
